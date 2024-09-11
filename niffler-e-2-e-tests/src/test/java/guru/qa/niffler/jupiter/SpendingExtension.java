@@ -1,19 +1,17 @@
 package guru.qa.niffler.jupiter;
 
 import guru.qa.niffler.api.SpendApiClient;
+import guru.qa.niffler.jupiter.anno.Spending;
 import guru.qa.niffler.model.CategoryJson;
 import guru.qa.niffler.model.CurrencyValues;
 import guru.qa.niffler.model.SpendJson;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ParameterContext;
-import org.junit.jupiter.api.extension.ParameterResolutionException;
-import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.platform.commons.support.AnnotationSupport;
 
 import java.util.Date;
 
-public class SpendingExtension implements BeforeEachCallback, ParameterResolver {
+public class SpendingExtension implements BeforeEachCallback {
 
   public static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.create(SpendingExtension.class);
 
@@ -37,20 +35,10 @@ public class SpendingExtension implements BeforeEachCallback, ParameterResolver 
               anno.description(),
               anno.username()
           );
-          context.getStore(NAMESPACE).put(
-              context.getUniqueId(),
-              spendApiClient.createSpend(spend)
-          );
+
+            SpendJson createdSpend = spendApiClient.createSpend(spend);
+
+            context.getStore(NAMESPACE).put(context.getUniqueId(), createdSpend);
         });
-  }
-
-  @Override
-  public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-    return parameterContext.getParameter().getType().isAssignableFrom(SpendJson.class);
-  }
-
-  @Override
-  public SpendJson resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-    return extensionContext.getStore(NAMESPACE).get(extensionContext.getUniqueId(), SpendJson.class);
   }
 }
